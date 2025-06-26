@@ -33,7 +33,7 @@ app.use(limiter);
 // ---------------------------
 // MongoDB Configuration
 // ---------------------------
-mongoose.connect('mongodb://localhost:27017/full_stack', {
+mongoose.connect('mongodb+srv://mvarunmathi2004:4546@cluster0.cwbdpuu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });

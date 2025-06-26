@@ -425,6 +425,7 @@ function Chatbot() {
     const input = userInput.toLowerCase().trim();
     
     const detectPattern = (patterns, threshold = 0.6) => {
+      if (!patterns || !Array.isArray(patterns)) return false;
       const exactMatch = patterns.some(pattern => 
         input === pattern || input.match(new RegExp(`^${pattern}[.!?]*$`, 'i')));
       
@@ -502,7 +503,7 @@ function Chatbot() {
       };
     }
     
-    if (detectPattern(messagePatterns.confusion)) {
+    if (detectPattern(messagePatterns.confused)) {
       return {
         content: "I'm sorry if I wasn't clear. Let me help you better - could you tell me specifically what you're looking to learn about social media? Or you can try one of these topics: reporting problems, growing followers, or privacy settings.",
         confidence: 0.9,
@@ -765,6 +766,11 @@ function Chatbot() {
       return generateSmartFallback(userInput);
     }
     
+    // Handle simple message responses (greetings, thanks, etc.)
+    if (match.content) {
+      return match.content;
+    }
+    
     const { answer, confidence, source, matched, isContextBased } = match;
     
     if (matched === 'exact' || confidence > 0.95) {
@@ -936,6 +942,45 @@ function Chatbot() {
   
   const processUserMessage = (message) => {
     const match = findBestMatch(message);
+    
+    // Handle simple message responses (greetings, thanks, etc.)
+    if (match && match.content) {
+      const assistantMessage = {
+        type: 'assistant',
+        content: match.content,
+        confidence: match.confidence || 1.0,
+        source: match.source || null,
+        isSimpleResponse: true
+      };
+      
+      setMessages(prevMessages => [...prevMessages, assistantMessage]);
+      setIsTyping(false);
+      
+      // Set appropriate suggestions based on the response type
+      if (match.isWhatCanIAsk) {
+        setSuggestions([
+          "How do I report harassment?",
+          "How to grow my followers?",
+          "Privacy settings guide"
+        ]);
+      } else if (match.isGreeting) {
+        setSuggestions([
+          "What can you help me with?",
+          "How do I report harassment?",
+          "How to grow my followers?"
+        ]);
+      } else {
+        setSuggestions([
+          "What can you help me with?",
+          "How to improve engagement?",
+          "Creating social media reports"
+        ]);
+      }
+      
+      return;
+    }
+    
+    // Handle Q&A responses
     const responseContent = generateSmartResponse(message, match);
     const confidence = match ? match.confidence : 0.3;
     
@@ -991,7 +1036,7 @@ function Chatbot() {
       }
     }
     
-    if (!match?.isFeedback && message.split(' ').length > 3) {
+    if (!match?.isFeedback && !match?.content && message.split(' ').length > 3) {
       setShowFeedback(messages.length + 1);
     }
   };
@@ -1238,7 +1283,7 @@ function Chatbot() {
                   </p>
                 ))}
                 
-                {message.type === 'assistant' && message.confidence > 0 && !message.isFeedback && (
+                {message.type === 'assistant' && message.confidence > 0 && !message.isFeedback && !message.isSimpleResponse && (
                   <div className="mt-2 text-xs text-gray-500 flex items-center">
                     <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-1 overflow-hidden">
                       <div 
@@ -1261,7 +1306,7 @@ function Chatbot() {
               )}
             </div>
             
-            {showFeedback === index && message.type === 'assistant' && !message.isFeedback && (
+            {showFeedback === index && message.type === 'assistant' && !message.isFeedback && !message.isSimpleResponse && (
               <div className="flex justify-center space-x-4 mt-1 animate-fadeIn">
                 <button 
                   onClick={() => handleFeedback(index, true)}
