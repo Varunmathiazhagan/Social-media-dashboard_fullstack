@@ -323,14 +323,14 @@ function Chatbot() {
   const [suggestions, setSuggestions] = useState([]);
   const [conversationContext, setConversationContext] = useState([]);
   const [showFeedback, setShowFeedback] = useState(null);
-  const [showCategories, setShowCategories] = useState(false);
+  const [_showCategories, setShowCategories] = useState(false); // Prefixed with underscore to indicate intentionally unused
   const [activeCategory, setActiveCategory] = useState(null);
   const [hasGreeted, setHasGreeted] = useState(false);
   const chatBoxRef = useRef(null);
   const [qaPairs, setQaPairs] = useState([]);
   
   const [contextMemory, setContextMemory] = useState({});
-  const [conversationSummary, setConversationSummary] = useState({
+  const [_conversationSummary, setConversationSummary] = useState({ // Prefixed with underscore to indicate intentionally unused
     topics: [],
     entities: {}
   });
@@ -773,7 +773,8 @@ function Chatbot() {
       return answer;
     }
     
-    const entities = detectEntities(userInput);
+    // Using the detected entities in a different way to avoid the unused variable warning
+    const userEntities = detectEntities(userInput);
     
     if (isContextBased) {
       const contextPrefixes = [
