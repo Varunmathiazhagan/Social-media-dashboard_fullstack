@@ -1,24 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import SocialBuzz from './components/SocialBuzz';
 import Chatbot from './components/Chatbot';
 import Analysis from './components/Analysis';
 import TwitterEngagement from './components/TwitterEngagement';
 import YoutubeDashboard from './components/YoutubeDashboard';
-import Login from './components/Login'; 
-import SignUp from './components/Signup'; 
 import './App.css';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Check if there's a token on load to verify if the user is authenticated
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);  // Set authentication status based on token
-  }, []);
-
   return (
     <Router>
       <div className="min-h-screen bg-gray-100">
@@ -31,12 +21,7 @@ function App() {
             <Route path="/chatbot" element={<Chatbot />} />
             <Route path="/twitter-engagement" element={<TwitterEngagement />} />
             <Route path="/youtube-dashboard" element={<YoutubeDashboard />} />
-            <Route 
-              path="/analysis" 
-              element={isAuthenticated ? <Analysis setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/login" />} 
-            />
-            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/analysis" element={<Analysis />} />
           </Routes>
         </main>
 
@@ -107,3 +92,4 @@ function Header() {
 }
 
 export default App;
+                
