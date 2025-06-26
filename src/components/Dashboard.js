@@ -95,7 +95,7 @@ function Dashboard() {
       clearInterval(typingInterval);
       clearInterval(tipInterval);
     };
-  }, []);
+  }, [aboutText, tips.length]);
 
   return (
     <div className="space-y-12 p-8 max-w-7xl mx-auto">
@@ -167,7 +167,7 @@ function Dashboard() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {["Real-time Analytics", "User Sentiment", "Engagement Graphs"].map((feature, index) => (
           <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <img src={featureImages[index]} alt={`${feature} image`} className="w-full h-40 object-cover rounded-lg mb-4" />
+            <img src={featureImages[index]} alt={`${feature}`} className="w-full h-40 object-cover rounded-lg mb-4" />
             <h3 className="text-2xl font-semibold text-blue-600 mb-3">{feature}</h3>
             <p className="text-gray-700">
               {index === 0 ? 'Get insights into your social media performance with real-time data.' : 

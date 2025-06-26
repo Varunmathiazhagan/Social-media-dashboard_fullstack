@@ -330,11 +330,11 @@ function Chatbot() {
   const [qaPairs, setQaPairs] = useState([]);
   
   const [contextMemory, setContextMemory] = useState({});
-  const [userPreferences, setUserPreferences] = useState({});
-  const [sessionHistory, setSessionHistory] = useState([]);
+  const [conversationSummary, setConversationSummary] = useState({
+    topics: [],
+    entities: {}
+  });
   
-  const [detectedLanguage, setDetectedLanguage] = useState('en');
-  const [userSentiment, setUserSentiment] = useState('neutral');
   const [userPersona, setUserPersona] = useState({
     expertise: 'unknown',
     verbosity: 'medium',
@@ -347,10 +347,6 @@ function Chatbot() {
     hasMultipleIntents: false,
     intents: [],
     currentIntentIndex: 0
-  });
-  const [conversationSummary, setConversationSummary] = useState({
-    topics: [],
-    entities: {}
   });
 
   useEffect(() => {
@@ -1091,11 +1087,6 @@ function Chatbot() {
     
     setMessages(prevMessages => [...prevMessages, feedbackMessage]);
     setShowFeedback(null);
-    
-    setUserPreferences(prev => ({
-      ...prev,
-      feedbackHistory: [...(prev.feedbackHistory || []), { index, isHelpful, timestamp: new Date().getTime() }]
-    }));
   };
 
   const sendMessage = async (message = inputMessage, isClickedSuggestion = false) => {
