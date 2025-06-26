@@ -415,7 +415,7 @@ function Chatbot() {
         setHasGreeted(true);
       }, 500);
     }
-  }, [hasGreeted, userPersona.lastInteraction, userPersona.previousTopics, userPersona.interests]);
+  }, [hasGreeted, userPersona.lastInteraction, userPersona.previousTopics, userPersona.interests, setConversationSummary]);
 
   const handleSimpleMessages = (userInput) => {
     const input = userInput.toLowerCase().trim();

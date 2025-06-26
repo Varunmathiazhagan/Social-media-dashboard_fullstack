@@ -33,10 +33,7 @@ app.use(limiter);
 // ---------------------------
 // MongoDB Configuration
 // ---------------------------
-mongoose.connect('mongodb+srv://mvarunmathi2004:4546@cluster0.cwbdpuu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+mongoose.connect('mongodb+srv://mvarunmathi2004:4546@cluster0.cwbdpuu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
@@ -253,6 +250,9 @@ app.get('/api/channel/:channelName', async (req, res) => {
 });
 
 // Start server
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+});
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
