@@ -1,5 +1,30 @@
 import React, { useState } from 'react';
-import Plot from 'react-plotly.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement
+} from 'chart.js';
+import { Bar, Pie, Line } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement
+);
 
 function YoutubeDashboard() {
   const [channelName, setChannelName] = useState('');
@@ -14,7 +39,7 @@ function YoutubeDashboard() {
     setChannelData(null);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/channel/${channelName}`);
+      const response = await fetch(`https://social-media-dashboard-fullstack.onrender.com/api/channel/${channelName}`);
       
       if (!response.ok) {
         throw new Error('Channel not found or error in fetching data.');
@@ -32,82 +57,158 @@ function YoutubeDashboard() {
   const renderCharts = () => {
     if (!channelData || !channelData.recentVideos) return null;
 
+    // Prepare data for charts
+    const videoLabels = channelData.recentVideos.map((_, index) => `Video ${index + 1}`);
     const videoTitles = channelData.recentVideos.map(video => video.title);
     const likes = channelData.recentVideos.map(video => video.likes);
     const comments = channelData.recentVideos.map(video => video.comments);
 
+    // Common chart options
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: function(context) {
+              return videoTitles[context[0].dataIndex];
+            }
+          }
+        }
+      }
+    };
+
+    // Bar chart data
+    const likesBarData = {
+      labels: videoLabels,
+      datasets: [
+        {
+          label: 'Likes',
+          data: likes,
+          backgroundColor: '#0d94d2',
+          borderColor: '#0a7bb0',
+          borderWidth: 1
+        }
+      ]
+    };
+
+    const commentsBarData = {
+      labels: videoLabels,
+      datasets: [
+        {
+          label: 'Comments',
+          data: comments,
+          backgroundColor: '#f39c12',
+          borderColor: '#d8850a',
+          borderWidth: 1
+        }
+      ]
+    };
+
+    // Line chart data for engagement comparison
+    const engagementComparisonData = {
+      labels: videoLabels,
+      datasets: [
+        {
+          label: 'Likes',
+          data: likes,
+          borderColor: '#0d94d2',
+          backgroundColor: 'rgba(13, 148, 210, 0.2)',
+          tension: 0.3
+        },
+        {
+          label: 'Comments',
+          data: comments,
+          borderColor: '#f39c12',
+          backgroundColor: 'rgba(243, 156, 18, 0.2)',
+          tension: 0.3
+        }
+      ]
+    };
+
+    // Pie chart data
+    const colors = [
+      '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'
+    ];
+
+    const likesPieData = {
+      labels: videoLabels.slice(0, 5),
+      datasets: [
+        {
+          data: likes.slice(0, 5),
+          backgroundColor: colors,
+          borderColor: colors.map(color => color.replace(')', ', 0.8)')),
+          borderWidth: 1
+        }
+      ]
+    };
+
+    const commentsPieData = {
+      labels: videoLabels.slice(0, 5),
+      datasets: [
+        {
+          data: comments.slice(0, 5),
+          backgroundColor: colors,
+          borderColor: colors.map(color => color.replace(')', ', 0.8)')),
+          borderWidth: 1
+        }
+      ]
+    };
+
+    // Pie chart options
+    const pieOptions = {
+      ...chartOptions,
+      cutout: '40%',
+      plugins: {
+        ...chartOptions.plugins,
+        legend: {
+          position: 'right'
+        }
+      }
+    };
+
     return (
       <div className="space-y-8">
-        <Plot
-          data={[{
-            x: videoTitles,
-            y: likes,
-            type: 'bar',
-            name: 'Likes',
-            marker: { color: '#0d94d2' }
-          }]}
-          layout={{
-            title: 'Recent Videos Likes',
-            xaxis: { title: 'Video Titles' },
-            yaxis: { title: 'Number of Likes' },
-            autosize: true
-          }}
-          useResizeHandler={true}
-          style={{width: "100%", height: "100%"}}
-        />
+        {/* Likes Bar Chart */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4">Recent Videos Likes</h3>
+          <div className="h-96">
+            <Bar data={likesBarData} options={chartOptions} />
+          </div>
+        </div>
 
-        <Plot
-          data={[{
-            x: videoTitles,
-            y: comments,
-            type: 'bar',
-            name: 'Comments',
-            marker: { color: '#f39c12' }
-          }]}
-          layout={{
-            title: 'Recent Videos Comments',
-            xaxis: { title: 'Video Titles' },
-            yaxis: { title: 'Number of Comments' },
-            autosize: true
-          }}
-          useResizeHandler={true}
-          style={{width: "100%", height: "100%"}}
-        />
+        {/* Comments Bar Chart */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4">Recent Videos Comments</h3>
+          <div className="h-96">
+            <Bar data={commentsBarData} options={chartOptions} />
+          </div>
+        </div>
+        
+        {/* Engagement Comparison Line Chart */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4">Engagement Comparison</h3>
+          <div className="h-96">
+            <Line data={engagementComparisonData} options={chartOptions} />
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Plot
-            data={[{
-              labels: videoTitles.slice(0, 5).map((_, index) => `Video ${index + 1}`),
-              values: likes.slice(0, 5),
-              type: 'pie',
-              textinfo: 'label+percent',
-              marker: { colors: ['#0d94d2', '#3498db', '#5dade2', '#85c1e9', '#a9cce3'] },
-              hole: 0.4
-            }]}
-            layout={{
-              title: 'Likes Distribution of Top 5 Videos',
-              autosize: true
-            }}
-            useResizeHandler={true}
-            style={{width: "100%", height: "100%"}}
-          />
+          {/* Likes Distribution Pie Chart */}
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-4">Likes Distribution of Top 5 Videos</h3>
+            <div className="h-72">
+              <Pie data={likesPieData} options={pieOptions} />
+            </div>
+          </div>
 
-          <Plot
-            data={[{
-              labels: videoTitles.slice(0, 5).map((_, index) => `Video ${index + 1}`),
-              values: comments.slice(0, 5),
-              type: 'pie',
-              textinfo: 'label+percent',
-              marker: { colors: ['#f39c12', '#e67e22', '#d35400', '#e74c3c', '#c0392b'] },
-              hole: 0.4
-            }]}
-            layout={{
-              title: 'Comments Distribution of Top 5 Videos',
-              autosize: true
-            }}
-            useResizeHandler={true}
-            style={{width: "100%", height: "100%"}}
-          />
+          {/* Comments Distribution Pie Chart */}
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-4">Comments Distribution of Top 5 Videos</h3>
+            <div className="h-72">
+              <Pie data={commentsPieData} options={pieOptions} />
+            </div>
+          </div>
         </div>
       </div>
     );
