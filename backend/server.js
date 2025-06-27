@@ -78,13 +78,25 @@ const YouTubeChannelSchema = new mongoose.Schema({
 const YouTubeChannel = mongoose.model('YouTubeChannel', YouTubeChannelSchema);
 
 // ---------------------------
-// Serve HTML pages
+// Serve API endpoints
 // ---------------------------
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'twitter_engagement.html'));
+    res.json({
+        message: 'Welcome to the Social Media Dashboard API.',
+        twitter: '/twitter',
+        youtube: '/youtube'
+    });
 });
 app.get('/y', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'youtube_dashboard.html'));
+    res.json({
+        message: 'Use /twitter for Twitter engagement and /youtube for YouTube dashboard.'
+    });
+});
+app.get('/twitter', (req, res) => {
+    res.json({ message: 'Twitter Engagement API endpoint.' });
+});
+app.get('/youtube', (req, res) => {
+    res.json({ message: 'YouTube Dashboard API endpoint.' });
 });
 
 // ---------------------------
