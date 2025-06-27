@@ -253,6 +253,3 @@ app.get('/api/channel/:channelName', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
