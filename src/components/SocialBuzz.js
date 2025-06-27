@@ -17,7 +17,11 @@ function SocialBuzz() {
       lastWeek.setDate(today.getDate() - 7);
       const formattedDate = lastWeek.toISOString().split('T')[0];
 
-      const response = await fetch(`https://newsapi.org/v2/everything?q=social+media&from=${formattedDate}&apiKey=${apiKey}`);
+      const apiUrl = `https://newsapi.org/v2/everything?q=social+media&from=${formattedDate}&apiKey=${apiKey}`;
+      // Using a CORS proxy to fetch news on the client-side for deployment.
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+
+      const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
       
       if (!response.ok) {
         throw new Error('Failed to fetch news');
