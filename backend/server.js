@@ -5,7 +5,6 @@ import puppeteer from 'puppeteer';
 import Sentiment from 'sentiment';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
-import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 
@@ -29,53 +28,6 @@ const limiter = rateLimit({
     max: 100, // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
-
-// ---------------------------
-// MongoDB Configuration
-// ---------------------------
-mongoose.connect('mongodb+srv://mvarunmathi2004:4546@cluster0.cwbdpuu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-    console.log('Connected to MongoDB');
-});
-
-// ---------------------------
-// Profile Schema and Model
-// ---------------------------
-const ProfileSchema = new mongoose.Schema({
-    username: String,
-    posts: String,
-    profile_photo: String,
-    following: String,
-    followers: String,
-    joined_date: String,
-    bio: String,
-    tweets: Array,
-}, { timestamps: true });
-const Profile = mongoose.model('Profile', ProfileSchema);
-
-// ---------------------------
-// YouTube Channel Schema and Model
-// ---------------------------
-const YouTubeChannelSchema = new mongoose.Schema({
-    channelName: String,
-    channelThumbnail: String,
-    totalViews: String,
-    totalSubscribers: String,
-    totalVideos: String,
-    recentVideos: [
-        {
-            title: String,
-            description: String,
-            publishedAt: Date,
-            likes: Number,
-            comments: Number,
-            views: Number,
-        },
-    ],
-}, { timestamps: true });
-const YouTubeChannel = mongoose.model('YouTubeChannel', YouTubeChannelSchema);
 
 // ---------------------------
 // Serve API endpoints
@@ -179,8 +131,6 @@ app.post('/get_profile', async (req, res) => {
     if (profileData.error) {
         return res.status(400).json({ message: profileData.error });
     }
-    const newProfile = new Profile(profileData);
-    await newProfile.save();
     res.json(profileData);
 });
 
@@ -248,12 +198,6 @@ app.get('/api/channel/:channelName', async (req, res) => {
                 views: videoDetails.statistics.viewCount,
             };
         }));
-        const youtubeChannelData = {
-            ...channelInfo,
-            recentVideos,
-        };
-        const newYouTubeChannel = new YouTubeChannel(youtubeChannelData);
-        await newYouTubeChannel.save();
         res.json({ stats: channelInfo, recentVideos });
     } catch (error) {
         console.error('Error fetching data from YouTube API:', error.response ? error.response.data : error.message);
