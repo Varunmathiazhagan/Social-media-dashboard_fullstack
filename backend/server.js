@@ -17,6 +17,7 @@ const YT_API_KEY = 'AIzaSyDuwfJ9vJFs9CYAzt6s_RZ1WbYiWe0JtEc';
 const sentiment = new Sentiment();
 
 // Middleware
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -54,10 +55,9 @@ app.get('/youtube', (req, res) => {
 // ---------------------------
 // Twitter Profile Data Fetching
 // ---------------------------
-async function fetchProfileData(username) {
-    const browser = await puppeteer.launch({
-        headless: true,
-        executablePath: 'C:\\Users\\mvaru\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+function getBrowserLaunchOptions() {
+    const launchOptions = {
+        headless: 'new',
         args: [
             '--disable-blink-features=AutomationControlled',
             '--no-sandbox',
@@ -65,10 +65,26 @@ async function fetchProfileData(username) {
             '--disable-web-security',
             '--allow-running-insecure-content',
         ],
-    });
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    };
+
+    // Auto-detect Chrome/Chromium on production (Render uses Linux)
+    if (typeof puppeteer.executablePath === 'function') {
+        try {
+            launchOptions.executablePath = puppeteer.executablePath();
+        } catch (err) {
+            console.warn('Unable to resolve Puppeteer executablePath automatically:', err.message);
+        }
+    }
+
+    return launchOptions;
+}
+
+async function fetchProfileData(username) {
+    let browser;
     try {
+        browser = await puppeteer.launch(getBrowserLaunchOptions());
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
         await page.goto(`https://x.com/${username}`, { waitUntil: 'networkidle2' });
         await page.waitForSelector('.r-n6v787', { timeout: 10000 });
         await page.waitForSelector('img[src*="profile_images"]', { timeout: 10000 });
@@ -90,12 +106,18 @@ async function fetchProfileData(username) {
             };
         }, username);
         const tweets = await fetchTweets(page);
-        await browser.close();
         return { ...profileData, tweets };
     } catch (err) {
         console.error('Error during Twitter profile data fetching:', err);
-        await browser.close();
         return { error: 'Error fetching Twitter profile data. Please check the username.' };
+    } finally {
+        if (browser) {
+            try {
+                await browser.close();
+            } catch (closeErr) {
+                console.warn('Error while closing Puppeteer browser:', closeErr.message);
+            }
+        }
     }
 }
 async function fetchTweets(page) {

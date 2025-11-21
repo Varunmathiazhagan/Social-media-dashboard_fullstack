@@ -1,0 +1,9 @@
+services:
+  # Backend API Service
+  - type: web
+    name: social-media-dashboard-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install && npx puppeteer browsers install chrome
+    startCommand: cd backend && node server.js
